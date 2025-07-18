@@ -1,3 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Data Update Report</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .group-container {
+            transition: all 0.3s ease;
+        }
+        .group-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .progress-bar {
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            transition: width 0.5s ease-in-out;
+        }
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        @media (max-width: 768px) {
+            .group-container {
+                width: 100%;
+                margin-bottom: 1rem;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="container mx-auto px-4 py-8">
+        <header class="mb-10">
+            <div class="flex justify-between items-center mb-6">
+                <h1 class="text-3xl font-bold text-gray-800">Employee Data Update Report</h1>
+                <span class="text-sm text-gray-500">Last updated: <span id="update-date"></span></span>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+                <div class="flex flex-col md:flex-row justify-between items-center">
+                    <div class="mb-4 md:mb-0">
+                        <h2 class="text-xl font-semibold text-gray-700">Overall Completion</h2>
+                        <p class="text-gray-500">Across all employee groups</p>
+                    </div>
+                    <div class="w-full md:w-1/2">
+                        <div class="flex justify-between mb-2 text-sm text-gray-600">
+                            <span>Current Progress</span>
+                            <span id="overall-percentage">0%</span>
+                        </div>
+                        <div class="progress-bar bg-gray-200">
+                            <div id="overall-progress" class="progress-fill bg-blue-500" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <img src="data:image/jpeg;base64,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" alt="Team of diverse professionals working together in a modern office space" class="rounded-xl shadow-md w-full object-cover h-57" />
+        </header>
+
+        <main>
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Employee Groups</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Group 1 -->
+                <div class="group-container bg-white rounded-xl shadow-md p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <div class="flex items-center">
+                            <div class="avatar bg-orange-500 mr-3">U</div>
+                            <h3 class="font-semibold text-lg text-orange-800">GENERAL</h3>
+                        </div>
+                        <span class="text-xs px-2 py-1 rounded-full bg-orange-100 text-orange-800">UMUM</span>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <div class="flex justify-between mb-2 text-sm text-gray-600">
+                            <span>Progress</span>
+                            <span id="group1-percentage">0%</span>
+                        </div>
+                        <div class="progress-bar bg-orange-200">
+                            <div id="group1-progress" class="progress-fill bg-orange-500" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-sm text-gray-600 mb-4">
+                        <div class="flex justify-between mb-1">
+                            <span>Total Employees</span>
+                            <span class="font-medium">8</span>
+                        </div>
+                        <div class="flex justify-between mb-1">
+                            <span>Updated</span>
+                            <span class="font-medium text-green-600" id="group1-updated">0</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Pending</span>
+                            <span class="font-medium text-red-600" id="group1-pending">8</span>
+                        </div>
+                    </div>
+                    
+                    <a href="https://docs.google.com/spreadsheets/d/1oU57gxhiFNeqLWavih9yCcWJb2z_NJaumShPro6vSdg/edit?gid=0#gid=0" target="_blank"
+                        class="w-full block text-center py-2 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 text-sm font-medium transition">
+                        View Details
+                    </a>
+                </div>
+
+                <!-- Group 2 -->
+                <div class="group-container bg-white rounded-xl shadow-md p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <div class="flex items-center">
+                            <div class="avatar bg-green-500 mr-3">G</div>
+                            <h3 class="font-semibold text-lg text-green-800">GREEN GROUP</h3>
+                        </div>
+                        <span class="text-xs px-2 py-1 rounded-full bg-green-100 text-green-800">GREEN</span>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <div class="flex justify-between mb-2 text-sm text-gray-600">
+                            <span>Progress</span>
+                            <span id="group2-percentage">0%</span>
+                        </div>
+                        <div class="progress-bar bg-green-200">
+                            <div id="group2-progress" class="progress-fill bg-green-500" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-sm text-gray-600 mb-4">
+                        <div class="flex justify-between mb-1">
+                            <span>Total Employees</span>
+                            <span class="font-medium">71</span>
+                        </div>
+                        <div class="flex justify-between mb-1">
+                            <span>Updated</span>
+                            <span class="font-medium text-green-600" id="group2-updated">0</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Pending</span>
+                            <span class="font-medium text-red-600" id="group2-pending">71</span>
+                        </div>
+                    </div>
+                    
+                    <a href="https://docs.google.com/spreadsheets/d/10QVpuFx5TX_oIUgsipvGKdfm5e4pZsVcRjJ-64I6s6A/edit?gid=0#gid=0" target="_blank"
+                        class="w-full block text-center py-2 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 text-sm font-medium transition">
+                        View Details
+                    </a>
+                </div>
+                
+                <!-- Group 3 -->
+                <div class="group-container bg-white rounded-xl shadow-md p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <div class="flex items-center">
+                            <div class="avatar bg-red-500 mr-3">R</div>
+                            <h3 class="font-semibold text-lg text-red-800">RED GROUP</h3>
+                        </div>
+                        <span class="text-xs px-2 py-1 rounded-full bg-red-100 text-RED-800">RED</span>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <div class="flex justify-between mb-2 text-sm text-gray-600">
+                            <span>Progress</span>
+                            <span id="group3-percentage">0%</span>
+                        </div>
+                        <div class="progress-bar bg-red-200">
+                            <div id="group3-progress" class="progress-fill bg-red-500" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-sm text-gray-600 mb-4">
+                        <div class="flex justify-between mb-1">
+                            <span>Total Employees</span>
+                            <span class="font-medium">71</span>
+                        </div>
+                        <div class="flex justify-between mb-1">
+                            <span>Updated</span>
+                            <span class="font-medium text-green-600" id="group3-updated">0</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Pending</span>
+                            <span class="font-medium text-red-600" id="group3-pending">71</span>
+                        </div>
+                    </div>
+                    
+                    <a href="https://docs.google.com/spreadsheets/d/10fBlWPdjKWJHmAVaE9ACmX741_F-YFb5MdGqZ0GihHA/edit?gid=0#gid=0" target="_blank"
+                        class="w-full block text-center py-2 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 text-sm font-medium transition">
+                        View Details
+                    </a>
+                </div>
+                
+                <!-- Group 4 -->
+                <div class="group-container bg-white rounded-xl shadow-md p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <div class="flex items-center">
+                            <div class="avatar bg-yellow-500 mr-3">Y</div>
+                            <h3 class="font-semibold text-lg text-yellow-800">YELLOW GROUP</h3>
+                        </div>
+                        <span class="text-xs px-2 py-1 rounded-full bg-yellow-100 text-yellow-800">YELLOW</span>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <div class="flex justify-between mb-2 text-sm text-gray-600">
+                            <span>Progress</span>
+                            <span id="group4-percentage">0%</span>
+                        </div>
+                        <div class="progress-bar bg-yellow-200">
+                            <div id="group4-progress" class="progress-fill bg-yellow-500" style="width: 0%"></div>
+                        </div>
+                    </div>
                     
                     <div class="text-sm text-gray-600 mb-4">
                         <div class="flex justify-between mb-1">
